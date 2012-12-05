@@ -32,7 +32,6 @@ import org.xml.sax.InputSource;
 public class JenkinsConfiguration implements RootAction {
 
     private String configFileContent;
-    private Script configScript;
     private Logger log = Logger.getLogger(JenkinsConfiguration.class.getName());
 
     public JenkinsConfiguration() {
@@ -96,9 +95,7 @@ public class JenkinsConfiguration implements RootAction {
      */
     public void transformToReadOnly(StaplerRequest request, StaplerResponse response) throws IOException {
         try {
-            if (configScript == null) {
-                configScript = compileScript();
-            }
+            Script configScript = compileScript();
             DefaultScriptInvoker invoker = new DefaultScriptInvoker();
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             HTMLWriterOutput xmlOutput = HTMLWriterOutput.create(output);
