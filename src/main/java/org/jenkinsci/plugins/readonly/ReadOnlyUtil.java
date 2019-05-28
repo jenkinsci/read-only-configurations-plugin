@@ -1,16 +1,16 @@
 package org.jenkinsci.plugins.readonly;
 
 import hudson.Functions;
-import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.model.User;
-import hudson.security.Permission;
-import java.io.IOException;
+import org.kohsuke.stapler.Stapler;
+import org.xml.sax.SAXException;
+
 import javax.servlet.ServletException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import org.kohsuke.stapler.Stapler;
-import org.xml.sax.SAXException;
+import java.io.IOException;
 
 /**
  * Transform html formular code to read-only
@@ -130,14 +130,13 @@ public class ReadOnlyUtil {
         return tag;
     }
     
-    public static boolean isAvailableJobConfiguration(AbstractProject target) throws IOException, ServletException{
+    public static boolean isAvailableJobConfiguration(Job target) throws IOException, ServletException{
         User user = User.current();
         if(user==null || user.getProperty(UserConfiguration.class).getDisplayForReadOnlyPermission()){
             return (!(Functions.hasPermission(target, target.CONFIGURE) || Functions.hasPermission(target, target.EXTENDED_READ))) && Functions.hasPermission(target, target.READ);
         }
         else{
             return true;
-        }       
-        
+        }
     }
 }

@@ -1,18 +1,7 @@
 package org.jenkinsci.plugins.readonly;
 
-import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Job;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.StringReader;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.ServletException;
 import jenkins.model.Jenkins;
 import org.apache.commons.jelly.JellyContext;
 import org.apache.commons.jelly.Script;
@@ -20,10 +9,16 @@ import org.kohsuke.stapler.MetaClass;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.WebApp;
-import org.kohsuke.stapler.jelly.DefaultScriptInvoker;      
+import org.kohsuke.stapler.jelly.DefaultScriptInvoker;
 import org.kohsuke.stapler.jelly.HTMLWriterOutput;
 import org.kohsuke.stapler.jelly.JellyClassLoaderTearOff;
 import org.xml.sax.InputSource;
+
+import javax.servlet.ServletException;
+import java.io.*;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Display Job configuration page in read-only form
@@ -32,11 +27,10 @@ import org.xml.sax.InputSource;
  */
 public class JobConfiguration implements Action {
 
-    private AbstractProject<?, ?> project;
+    private Job<?, ?> job;
 
-    public JobConfiguration(AbstractProject<?, ?> project) {
-        this.project = project;
-        
+    public JobConfiguration(Job<?, ?> job) {
+        this.job = job;
     }
     
     /**
@@ -72,7 +66,7 @@ public class JobConfiguration implements Action {
     }
     
     public boolean isAvailable() throws IOException, ServletException{
-        return ReadOnlyUtil.isAvailableJobConfiguration(project);
+        return ReadOnlyUtil.isAvailableJobConfiguration(job);
     }
     
     public String getConfigContent(){
@@ -110,7 +104,7 @@ public class JobConfiguration implements Action {
                 HTMLWriterOutput xmlOutput = HTMLWriterOutput.create(out);
                 Script script = compileScript();           
                 xmlOutput.useHTML(true);          
-                invoker.invokeScript(request, response, script, project, xmlOutput);       
+                invoker.invokeScript(request, response, script, job, xmlOutput);
                 String page = ReadOnlyUtil.transformInputsToReadOnly(out.toString("UTF-8"), null);  
                 OutputStream output = response.getCompressedOutputStream(request);
                 output.write(page.getBytes());
