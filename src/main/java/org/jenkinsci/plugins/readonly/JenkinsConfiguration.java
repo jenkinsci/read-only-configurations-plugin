@@ -78,7 +78,7 @@ public class JenkinsConfiguration implements RootAction {
     }
 
     public String getDisplayName() {
-        return "Global configuration";
+        return "Read-only global configuration";
     }
 
     public String getUrlName() {
