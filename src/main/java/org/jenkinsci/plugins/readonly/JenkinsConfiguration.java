@@ -2,30 +2,22 @@ package org.jenkinsci.plugins.readonly;
 
 import hudson.Extension;
 import hudson.model.RootAction;
+import jenkins.model.Jenkins;
+import org.apache.commons.jelly.Script;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.StringReader;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.jelly.Script;
-import org.kohsuke.stapler.MetaClass;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.WebApp;
-import org.kohsuke.stapler.jelly.DefaultScriptInvoker;
-import org.kohsuke.stapler.jelly.HTMLWriterOutput;
-import org.kohsuke.stapler.jelly.JellyClassLoaderTearOff;
-import jenkins.model.Jenkins;
-import org.apache.commons.jelly.JellyContext;
-import org.xml.sax.InputSource;
 
 /**
  * Display Jenkins configuration page in read-only form
- * 
+ *
  * @author Lucie Votypkova
  */
 @Extension
@@ -46,7 +38,7 @@ public class JenkinsConfiguration implements RootAction {
                     output.write(b);
                 }
             }
-            String outputConfig = output.toString();
+            String outputConfig = output.toString(Settings.encoding);
             configFileContent = outputConfig.replace("it.ADMINISTER", "it.READ"); //change permission
         } catch (Exception e) {
             log.log(Level.WARNING, "Read-only configuration plugin failed to load configuration script", e);
@@ -55,22 +47,16 @@ public class JenkinsConfiguration implements RootAction {
 
     /**
      * Compile script with a context for Jenkins class
-     * 
+     *
      * @return compiled script
      */
     public Script compileScript() {
-        Script result = null;
         try {
-            MetaClass c = WebApp.getCurrent().getMetaClass(Jenkins.getInstance().getClass());
-            JellyContext context = new JellyClassLoaderTearOff(c.classLoader).createContext();
-            StringReader buffer = new StringReader(configFileContent);
-            InputSource source = new InputSource(buffer);
-            source.setSystemId("org.jenkinsci.plugins.readonly.JenkinsConfiguration");
-            result = context.compileScript(source);
+            return ConfigurationUtil.compileScript(configFileContent, "org.jenkinsci.plugins.readonly.JenkinsConfiguration");
         } catch (Exception ex) {
             log.log(Level.WARNING, "Read-only configuration plugin failed to compile script", ex);
         }
-        return result;
+        return null;
     }
 
     public String getIconFileName() {
@@ -83,30 +69,22 @@ public class JenkinsConfiguration implements RootAction {
 
     public String getUrlName() {
         return "configure-readonly";
-    }  
-    
-    public void doIndex(StaplerRequest request, StaplerResponse response) throws IOException{
-        transformToReadOnly(request, response);        
     }
-    
+
+    public void doIndex(StaplerRequest request, StaplerResponse response) throws IOException {
+        transformToReadOnly(request, response);
+    }
+
     /**
      * Transformation of html code which modify all formular's items to read-only
-     * 
      */
     public void transformToReadOnly(StaplerRequest request, StaplerResponse response) throws IOException {
         try {
             Script configScript = compileScript();
-            DefaultScriptInvoker invoker = new DefaultScriptInvoker();
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            HTMLWriterOutput xmlOutput = HTMLWriterOutput.create(output);
-            xmlOutput.useHTML(true);
-            invoker.invokeScript(request, response, configScript, Jenkins.getInstance(), xmlOutput);
-            String page = ReadOnlyUtil.transformInputsToReadOnly(output.toString(),null);
-            OutputStream st = response.getCompressedOutputStream(request);
-            st.write(page.getBytes());
-            st.close();
+            Object it = Jenkins.getInstance();
+            ConfigurationUtil.transformToReadOnly(request, response, configScript, it, null);
         } catch (Exception ex) {
-            ex.printStackTrace(new PrintStream(response.getOutputStream()));
+            ex.printStackTrace(new PrintStream(response.getOutputStream(), false, Settings.encoding));
         }
     }
 }

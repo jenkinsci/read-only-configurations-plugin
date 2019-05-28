@@ -3,14 +3,29 @@ package org.jenkinsci.plugins.readonly;
 import hudson.Functions;
 import hudson.model.Job;
 import hudson.model.User;
+import jenkins.model.Jenkins;
+import org.apache.commons.jelly.JellyContext;
+import org.apache.commons.jelly.JellyException;
+import org.apache.commons.jelly.Script;
+import org.kohsuke.stapler.MetaClass;
 import org.kohsuke.stapler.Stapler;
+import org.kohsuke.stapler.WebApp;
+import org.kohsuke.stapler.jelly.JellyClassLoaderTearOff;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.servlet.ServletException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.net.URL;
+import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Transform html formular code to read-only
@@ -139,4 +154,5 @@ public class ReadOnlyUtil {
             return true;
         }
     }
+
 }
