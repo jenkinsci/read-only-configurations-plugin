@@ -13,13 +13,7 @@
     <packaging>hpi</packaging>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Read-only+configurations+plugin</url>
   
-  <developers>
-    <developer>
-      <id>lvotypko</id>
-      <name>Lucie Votypkova</name>
-      <email>lvotypko@redhat.com</email>
-    </developer>
-  </developers>
+  <developers/>
   
   <distributionManagement>
     <repository>
