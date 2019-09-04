@@ -4,13 +4,10 @@
  */
 package org.jenkinsci.plugins.readonly;
 
-import com.google.common.base.Functions;
 import hudson.Extension;
-import hudson.Util;
 import hudson.model.Action;
 import hudson.model.Computer;
 import hudson.model.TransientComputerActionFactory;
-import hudson.security.Permission;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
